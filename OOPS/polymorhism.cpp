@@ -1,57 +1,48 @@
 #include <iostream>
 #include <vector>
+#include <memory>
 
 // Base Class
-class Animal {
+class Car {
 public:
-    // Virtual function allows overriding and dynamic dispatch
-    virtual void makeSound() {
-        std::cout << "Some generic animal sound...\n";
-    }
+    // Virtual destructor is essential when using polymorphism to prevent memory leaks
+    virtual ~Car() = default;
 
-    virtual ~Animal() {} // Virtual destructor for safe cleanup
+    // Pure virtual function makes Car an abstract class and 
+    // forces derived classes to implement their own drive() behavior.
+    virtual void drive() const = 0;
 };
 
-// Derived Class 1
-class Dog : public Animal {
+// Derived Class 1: Electric Car
+class ElectricCar : public Car {
 public:
-    void makeSound() override {
-        std::cout << "Dog says: Woof! Woof!\n";
-    }
-};
-
-// Derived Class 2
-class Cat : public Animal {
-public:
-    void makeSound() override {
-        std::cout << "Cat says: Meow~ Meow~\n";
+    void drive() const override {
+        std::cout << "Electric Car: Gliding silently with instant torque. No gear shifting required!\n";
     }
 };
 
-// Derived Class 3
-class Cow : public Animal {
+// Derived Class 2: Manual Car
+class ManualCar : public Car {
 public:
-    void makeSound() override {
-        std::cout << "Cow says: Moo... Moo...\n";
+    void drive() const override {
+        std::cout << "Manual Car: Engaging the clutch, shifting gears, and revving the engine.\n";
     }
 };
 
 int main() {
-    // A collection of base class pointers storing different derived objects
-    std::vector<Animal*> zoo;
-    zoo.push_back(new Dog());
-    zoo.push_back(new Cat());
-    zoo.push_back(new Cow());
+    // Create a collection (vector) of base class smart pointers
+    std::vector<std::unique_ptr<Car>> garage;
 
-    // Polymorphic behavior in action:
-    // The exact same method call triggers different behaviors depending on the object.
-    for (Animal* animal : zoo) {
-        animal->makeSound(); 
-    }
+    // Store different types of cars in the same collection
+    garage.push_back(std::make_unique<ElectricCar>());
+    garage.push_back(std::make_unique<ManualCar>());
 
-    // Clean up dynamically allocated memory
-    for (Animal* animal : zoo) {
-        delete animal;
+    std::cout << "--- Starting the Fleet (Dynamic Polymorphism in Action) ---\n\n";
+
+    // Loop through the garage and call drive()
+    // The compiler doesn't know which drive() to call until the program runs!
+    for (const auto& car : garage) {
+        car->drive();
     }
 
     return 0;
